@@ -6,21 +6,21 @@
     <title>Sydney Sweeney Daily</title>
     <style>
         body {
-            margin: 0; padding: 0; font-family: Arial, sans-serif;
+            margin:0; padding:0; font-family:Arial,sans-serif;
             background:#f0f0f0; display:flex; flex-direction:column;
-            align-items:center; justify-content:center; height:100vh; text-align:center;
+            align-items:center; justify-content:center; min-height:100vh; text-align:center;
         }
-        h1 { color:#333; margin-bottom:20px; }
+        h1 { color:#333; margin:20px 0; }
         #image-container {
             position:relative; max-width:90%; max-height:70vh; overflow:hidden;
-            border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.2);
+            border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.2); background:#fff;
         }
         #sweeney-img { width:100%; height:auto; display:block; }
-        #caption { margin-top:15px; font-size:1.1em; color:#555; }
+        #caption { margin:15px 0; font-size:1.1em; color:#555; }
         #refresh-note { margin-top:20px; font-size:0.9em; color:#777; }
         .spinner {
             position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-            width:40px; height:40px; border:5px solid #ddd; border-top:5px solid #333;
+            width:40px; height:40px; border:5px solid #eee; border-top:5px solid #333;
             border-radius:50%; animation:spin 1s linear infinite; display:none;
         }
         @keyframes spin { to { transform:translate(-50%,-50%) rotate(360deg); } }
@@ -37,7 +37,6 @@
     <p id="refresh-note">Refreshes every 24 hours with a new photo.</p>
 
     <script>
-        // Raw, non-thumbnail URLs – always load, even from file://
         const imageList = [
             { url: 'https://upload.wikimedia.org/wikipedia/commons/0/0d/Sydney_Sweeney_%2853563526453%29_%28cropped%29.jpg', caption: 'Sydney Sweeney at the 2023 Cannes Film Festival' },
             { url: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Sydney_Sweeney_by_Gage_Skidmore.jpg', caption: 'Sydney Sweeney at San Diego Comic-Con 2019' },
@@ -49,9 +48,8 @@
         function getDailyIndex() {
             const now = new Date();
             const start = new Date(now.getFullYear(), 0, 0);
-            const diff = now - start;
-            const oneDay = 86400000; // 24*60*60*1000
-            const dayOfYear = Math.floor(diff / oneDay);
+            const oneDay = 86400000;
+            const dayOfYear = Math.floor((now - start) / oneDay);
             return dayOfYear % imageList.length;
         }
 
@@ -62,11 +60,9 @@
             const caption = document.getElementById('caption');
             const spinner = document.getElementById('spinner');
 
-            // Show spinner
             spinner.style.display = 'block';
-            caption.textContent = '';
+            caption.textContent = 'Loading...';
 
-            // Pre-load image
             const tempImg = new Image();
             tempImg.onload = () => {
                 img.src = selected.url;
@@ -75,17 +71,15 @@
                 spinner.style.display = 'none';
             };
             tempImg.onerror = () => {
-                img.src = 'https://via.placeholder.com/800x1000/f0f0f0/666666?text=Image+Failed';
-                caption.textContent = 'Image failed to load – check your internet.';
+                img.src = 'https://via.placeholder.com/800x1000/f0f0f0/666666?text=No+Image';
+                caption.textContent = 'Image failed – check connection.';
                 spinner.style.display = 'none';
             };
             tempImg.src = selected.url;
         }
 
-        // Initial load
         loadDailyImage();
 
-        // Refresh at local midnight
         setInterval(() => {
             const n = new Date();
             if (n.getHours() === 0 && n.getMinutes() === 0) loadDailyImage();
